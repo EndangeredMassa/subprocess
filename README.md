@@ -18,7 +18,7 @@ npm install --save subprocess
 ```js
 var subprocess = require('subprocess');
 
-var processes = {
+var config = {
   processName: {
     dependsOn: ['<other proc name>', ...],  // optional
     command: 'node index.js --port=%port%', // %port% is populated with the port
@@ -37,21 +37,57 @@ var processes = {
   }
 };
 
-subprocess(processes, function(errors, processes){
-  // `errors` is an array of objects describing any errors, if any;
-  // each item is in the form:
-  // {
-  //   name: '<processName>',
-  //   error: <some error object>
-  // }
+subprocess(config, function(error, processes){
+  // `error` can be a custom error thrown
+  // by the verify function or it can be
+  // an subprocess-specific error;
+  // see the errors section for more info
 
-  // `processes` is a hash of process names to process objects
+  /*
+  processes = {
+    processName: {
+      rawProcess: [ChildProcess],
+      baseUrl: "http://127.0.0.1:9999",
+      port: 9999,
+      logPath: './log/process.log',
+      logHandle: [LogHandle],
+      launchCommand: 'node',
+      launchArguments: ['index.js', '--port=9999'],
+      workingDirectory: '~/someplace'
+    }
+  }
+  */
 });
 ```
 
 All processes started this way will be
 automatically registered to kill themselves
 on `process.on('uncaughtException', handler)`.
+
+
+### `subprocess.killAll`
+
+subprocess exposes a method that
+can kill all of your processes for you.
+
+```js
+subprocess(config, function(error, processes){
+  if (error) throw error;
+
+  // do some things
+
+  subprocess.killAll(processes);
+});
+```
+
+You don't have to use this method
+to kill all processes.
+The point of subprocess is that it
+will kill these for you when the
+main process exits.
+However, if you want to manage this yourself,
+this is how you do it.
+
 
 ## example
 
@@ -86,5 +122,61 @@ subprocess(processes, function(errors, processes){
 
   console.log('processes started successfully!');
 });
+```
+
+## errors
+
+### command not found
+
+When the `command` string is passed to the system
+and a `NOENT` error is returned,
+subprocess will callback with an error with message:
+
+```
+Unable to find <command>
+```
+
+### process crashed
+
+When a process started by subprocess crashes
+before it can be verified,
+subprocess will callback with an error with message:
+
+```
+Process <processName> crashed with code <exitCode>.
+Log output (last 20 lines):
+
+>
+> <log output>
+>
+
+See the full log at: <log path>
+<original error message>
+```
+
+### process verification timeout
+
+When a process appears to start propertly,
+but cannot be verified before the `verifyTimeout`,
+subprocess will callback with an error with message:
+
+```
+Process <processName> did not start in time.
+
+Debug info:
+* command: <command>
+           <command arguments>
+* cwd:     <working directory>
+* port:    <port>
+* timeout: <timeout>
+
+Log output (last 20 lines):
+
+>
+> <log output>
+>
+
+See the full log at: <log path>
+<original error message>
 ```
 
