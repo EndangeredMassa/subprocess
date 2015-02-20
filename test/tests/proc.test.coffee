@@ -7,7 +7,7 @@ processes = null
 # running our tests won't clean itself
 # up properly; so, we have to do this
 process.on 'uncaughtException', (error) ->
-  processes?.killAll()
+  sub.killAll(processes) if processes?
   console.error error.stack
   process.exit(1)
 
@@ -15,7 +15,7 @@ describe 'sub', ->
   beforeEach ->
     processes = null
   afterEach ->
-    processes?.killAll()
+    sub.killAll(processes) if processes?
 
   it 'starts a process', (done) ->
     config =
@@ -28,8 +28,8 @@ describe 'sub', ->
 
       try
         assert.falsey 'error', error
-        assert.falsey 'process.exitCode', processes.procs.app.rawProcess.exitCode
-        assert.truthy 'process.pid', processes.procs.app.rawProcess.pid
+        assert.falsey 'process.exitCode', processes.app.rawProcess.exitCode
+        assert.truthy 'process.pid', processes.app.rawProcess.pid
         done()
       catch testError
         done(testError)
@@ -73,7 +73,7 @@ describe 'sub', ->
       # to actually write out to the log file;
       # yes, arbitrary delays are bad
       setTimeout ( ->
-        processes.procs.app.readLog (error, log) ->
+        processes.app.readLog (error, log) ->
           return done(error) if error?
           try
             assert.include '100', log

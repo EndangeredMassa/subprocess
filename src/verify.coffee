@@ -3,7 +3,7 @@
 getLogWithQuote = (proc) ->
   logQuote =
     try
-      createTailQuote readFileSync(proc.metadata.logPath, 'utf8'), 20
+      createTailQuote readFileSync(proc.logPath, 'utf8'), 20
     catch err
       "(failed to load log: #{err.message})"
 
@@ -12,7 +12,7 @@ getLogWithQuote = (proc) ->
 
   #{logQuote}
 
-  See the full log at: #{proc.metadata.logPath}
+  See the full log at: #{proc.logPath}
   """
 
 procCrashedError = (proc) ->
@@ -46,9 +46,9 @@ procTimedoutError = (proc, port, timeout) ->
     Process \"#{proc.name}\" did not start in time.
 
     Debug info:
-    * command: #{proc.metadata.launchCommand}
-               #{formatArguments proc.metadata.launchArguments}
-    * cwd:     #{proc.metadata.workingDirectory}
+    * command: #{proc.launchCommand}
+               #{formatArguments proc.launchArguments}
+    * cwd:     #{proc.workingDirectory}
     * port:    #{port}
     * timeout: #{niceTime timeout}
     ```

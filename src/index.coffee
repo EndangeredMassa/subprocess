@@ -57,22 +57,20 @@ defaults =
 
       callback(null, true)
 
-module.exports = (processConfig, callback) ->
+subprocess = (processConfig, callback) ->
   config = {}
   for key in Object.keys(processConfig)
     config[key] = autoable(key, processConfig[key])
 
   async.auto config, (error, procs) ->
     return callback(error) if error?
+    callback(null, procs)
 
-    sub =
-      procs: procs
-      killAll: ->
-        for key, value of @procs
-          value.rawProcess.kill()
+subprocess.killAll = (procs) ->
+  for key, value of procs
+    value.rawProcess.kill()
 
-    callback(null, sub)
-
+module.exports = subprocess
 
 
 ###
