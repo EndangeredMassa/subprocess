@@ -64,7 +64,14 @@ module.exports = (processConfig, callback) ->
 
   async.auto config, (error, procs) ->
     return callback(error) if error?
-    callback(null, procs)
+
+    sub =
+      procs: procs
+      killAll: ->
+        for key, value of @procs
+          value.rawProcess.kill()
+
+    callback(null, sub)
 
 
 

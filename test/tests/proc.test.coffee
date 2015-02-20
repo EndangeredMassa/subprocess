@@ -1,22 +1,35 @@
 sub = require '../../src'
 assert = require 'assertive'
 
+processes = null
+
+# if mocha crashes, the child process
+# running our tests won't clean itself
+# up properly; so, we have to do this
+process.on 'uncaughtException', (error) ->
+  processes?.killAll()
+  console.error error.stack
+  process.exit(1)
+
 describe 'sub', ->
-  # TODO
-  #afterEach (done) ->
-  #  @processes.killAll(done)
+  beforeEach ->
+    processes = null
+  afterEach ->
+    processes?.killAll()
 
   it 'starts a process', (done) ->
-    processes =
+    config =
       app:
         command: 'node test/apps/service.js %port%'
         logFilePath: 'test/log/start-proc.log'
 
-    sub processes, (error, processes) ->
+    sub config, (error, _processes) ->
+      processes = _processes
+
       try
         assert.falsey 'error', error
-        assert.falsey 'process.exitCode', processes.app.rawProcess.exitCode
-        assert.truthy 'process.pid', processes.app.rawProcess.pid
+        assert.falsey 'process.exitCode', processes.procs.app.rawProcess.exitCode
+        assert.truthy 'process.pid', processes.procs.app.rawProcess.pid
         done()
       catch testError
         done(testError)
@@ -24,7 +37,7 @@ describe 'sub', ->
   it 'allows custom verification', (done) ->
     forceError = new Error 'force failure'
 
-    processes =
+    config =
       app:
         command: 'node test/apps/service.js %port%'
         logFilePath: 'test/log/custom-verification.log'
@@ -32,15 +45,16 @@ describe 'sub', ->
         verify: (port, callback) ->
           callback(forceError)
 
-    sub processes, (error, processes) ->
+    sub config, (error, _processes) ->
+      processes = _processes
       try
-        assert.equal error, forceError
+        assert.equal forceError, error
         done()
       catch testError
         done(testError)
 
   it 'passes along spawn options', (done) ->
-    processes =
+    config =
       app:
         command: 'node test/apps/env-echo.js'
         logFilePath: 'test/log/spawn-opts.log'
@@ -51,24 +65,25 @@ describe 'sub', ->
           env:
             testResult: 100
 
-    sub processes, (error, processes) ->
+    sub config, (error, _processes) ->
+      processes = _processes
       return done(error) if error?
 
       # wait a little bit for the process
       # to actually write out to the log file;
       # yes, arbitrary delays are bad
       setTimeout ( ->
-        processes.app.readLog (error, log) ->
+        processes.procs.app.readLog (error, log) ->
           return done(error) if error?
           try
             assert.include '100', log
             done()
           catch testError
             done(testError)
-      ), 50
+      ), 100
 
   it 'allows arbitrary verification timeouts', (done) ->
-    processes =
+    config =
       app:
         command: 'node test/apps/hang.js'
         logFilePath: 'test/log/timeout.log'
@@ -76,7 +91,8 @@ describe 'sub', ->
         verify: (port, callback) ->
           callback(null, false) # not yet ready
 
-    sub processes, (error, processes) ->
+    sub config, (error, _processes) ->
+      processes = _processes
       try
         assert.include 'timeout: 10ms', error.message
         done()
@@ -84,12 +100,13 @@ describe 'sub', ->
         done(testError)
 
   it 'shows the log when a process errors', (done) ->
-    processes =
+    config =
       app:
         command: 'node test/apps/error.js %port%'
         logFilePath: 'test/log/process-error.log'
 
-    sub processes, (error, processes) ->
+    sub config, (error, _processes) ->
+      processes = _processes
       try
         assert.include 'intentional failure', error.message
         done()
@@ -98,7 +115,7 @@ describe 'sub', ->
 
   it 'starts dependant processes', (done) ->
     # TODO: test that one starts before the other
-    processes =
+    config =
       app:
         dependsOn: ['service']
         command: 'node test/apps/service.js %port%'
@@ -111,6 +128,7 @@ describe 'sub', ->
         verify: (port, callback) ->
           callback(null, true) # no error
 
-    sub processes, (error, processes) ->
+    sub config, (error, _processes) ->
+      processes = _processes
       done(error)
 
