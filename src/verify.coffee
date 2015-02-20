@@ -59,7 +59,7 @@ procTimedoutError = (proc, port, timeout) ->
   new Error message
 
 module.exports = (proc, validate, interval, timeout, port, callback) ->
-  if proc.exitCode?
+  if proc.rawProcess.exitCode?
     error = procCrashedError(proc)
     return callback(error)
 
@@ -69,17 +69,19 @@ module.exports = (proc, validate, interval, timeout, port, callback) ->
 
   check = ->
     # debug 'Checking for %s on port %s', procName, port
-    validate port, (error) ->
+    validate port, (error, isReady) ->
       if proc.rawProcess.exitCode?
         error = procCrashedError(proc)
         return callback(error)
 
-      if error?
+      return callback(error) if error?
+
+      if isReady
+        callback()
+      else
         if (Date.now() - startTime) >= timeout
           return callback(procTimedoutError proc, port, timeout)
         setTimeout(check, 100)
-      else
-        callback()
 
   check()
 

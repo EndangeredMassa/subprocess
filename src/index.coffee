@@ -53,9 +53,9 @@ defaults =
   verify: (port, callback) ->
     portscanner.checkPortStatus port, '127.0.0.1', (error, status) ->
       return callback(error) if error?
-      return callback(new Error("port #{port} not available")) if status == 'closed'
+      return callback(null, false) if status == 'closed'
 
-      callback(null)
+      callback(null, true)
 
 module.exports = (processConfig, callback) ->
   config = {}

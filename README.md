@@ -30,7 +30,9 @@ var processes = {
     verifyTimeout: 3000,                    // ms, default
     verify: function(port, callback){       // optional, defaults to checking
       // custom verification logic          //   for port availablility
-      callback(isAvailable);
+      // `error` means to stop checking for availability
+      // `isAvailable=false` means to keep checking
+      callback(error, isAvailable);
     }
   }
 };

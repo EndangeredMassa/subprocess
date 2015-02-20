@@ -2,19 +2,35 @@ sub = require '../../src'
 assert = require 'assertive'
 
 describe 'sub', ->
-  beforeEach ->
-    @timeout 3000
+  # TODO
+  #afterEach (done) ->
+  #  @processes.killAll(done)
 
   it 'starts a process'
-  it 'allows custom verification'
+
+  it 'allows custom verification', (done) ->
+    forceError = new Error 'force failure'
+
+    processes =
+      app:
+        command: 'node test/apps/service.js %port%'
+        logFilePath: 'test/log/custom-verification.log'
+        port: 6501
+        verify: (port, callback) ->
+          callback(forceError)
+
+    sub processes, (error, processes) ->
+      assert.equal error, forceError
+      done()
 
   it 'passes along spawn options', (done) ->
     processes =
       app:
         command: 'node test/apps/env-echo.js'
         logFilePath: 'test/log/spawn-opts.log'
+        port: 9933
         verify: (port, callback) ->
-          callback(null)
+          callback(null, true)
         spawnOpts:
           env:
             testResult: 100
@@ -38,6 +54,8 @@ describe 'sub', ->
         command: 'node test/apps/hang.js'
         logFilePath: 'test/log/timeout.log'
         verifyTimeout: 10
+        verify: (port, callback) ->
+          callback(null, false) # not yet ready
 
     sub processes, (error, processes) ->
       assert.include 'timeout: 10ms', error.message
@@ -66,7 +84,7 @@ describe 'sub', ->
         command: 'node test/apps/service.js %port%'
         logFilePath: 'test/log/dep-service.log'
         verify: (port, callback) ->
-          callback(null) # no error
+          callback(null, true) # no error
 
     sub processes, (error, processes) ->
       done(error)
