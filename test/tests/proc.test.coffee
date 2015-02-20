@@ -114,18 +114,23 @@ describe 'sub', ->
         done(testError)
 
   it 'starts dependant processes', (done) ->
-    # TODO: test that one starts before the other
+    serviceReady = false
+
     config =
       app:
         dependsOn: ['service']
         command: 'node test/apps/service.js %port%'
         logFilePath: 'test/log/dep-app.log'
         port: 6500
+        verify: (port, callback) ->
+          return callback(new Error 'service not yet started') if !serviceReady
+          callback(null, true)
 
       service:
         command: 'node test/apps/service.js %port%'
         logFilePath: 'test/log/dep-service.log'
         verify: (port, callback) ->
+          serviceReady = true
           callback(null, true) # no error
 
     sub config, (error, _processes) ->
