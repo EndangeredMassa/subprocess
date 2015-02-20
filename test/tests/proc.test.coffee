@@ -6,7 +6,20 @@ describe 'sub', ->
   #afterEach (done) ->
   #  @processes.killAll(done)
 
-  it 'starts a process'
+  it 'starts a process', (done) ->
+    processes =
+      app:
+        command: 'node test/apps/service.js %port%'
+        logFilePath: 'test/log/start-proc.log'
+
+    sub processes, (error, processes) ->
+      try
+        assert.falsey 'error', error
+        assert.falsey 'process.exitCode', processes.app.rawProcess.exitCode
+        assert.truthy 'process.pid', processes.app.rawProcess.pid
+        done()
+      catch testError
+        done(testError)
 
   it 'allows custom verification', (done) ->
     forceError = new Error 'force failure'
@@ -20,8 +33,11 @@ describe 'sub', ->
           callback(forceError)
 
     sub processes, (error, processes) ->
-      assert.equal error, forceError
-      done()
+      try
+        assert.equal error, forceError
+        done()
+      catch testError
+        done(testError)
 
   it 'passes along spawn options', (done) ->
     processes =
@@ -44,8 +60,11 @@ describe 'sub', ->
       setTimeout ( ->
         processes.app.readLog (error, log) ->
           return done(error) if error?
-          assert.include '100', log
-          done()
+          try
+            assert.include '100', log
+            done()
+          catch testError
+            done(testError)
       ), 50
 
   it 'allows arbitrary verification timeouts', (done) ->
@@ -58,8 +77,11 @@ describe 'sub', ->
           callback(null, false) # not yet ready
 
     sub processes, (error, processes) ->
-      assert.include 'timeout: 10ms', error.message
-      done()
+      try
+        assert.include 'timeout: 10ms', error.message
+        done()
+      catch testError
+        done(testError)
 
   it 'shows the log when a process errors', (done) ->
     processes =
@@ -68,8 +90,11 @@ describe 'sub', ->
         logFilePath: 'test/log/process-error.log'
 
     sub processes, (error, processes) ->
-      assert.include 'intentional failure', error.message
-      done()
+      try
+        assert.include 'intentional failure', error.message
+        done()
+      catch testError
+        done(testError)
 
   it 'starts dependant processes', (done) ->
     # TODO: test that one starts before the other
