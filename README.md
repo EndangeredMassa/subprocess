@@ -106,20 +106,18 @@ var processes = {
     command: 'node service.js --port=%port%',
     verify: function(port, callback){
       request('http://localhost:'+port+'/status', function(error, response, body){
-        callback(!error && response.statusCode == 200);
+        var isReady = !error && response.statusCode == 200;
+        callback(null, isReady);
       });
     }
   }
 };
 
-subprocess(processes, function(errors, processes){
-  if (errors.length > 0) {
-    errors.forEach(function(error){
-      console.error(error);
-    });
+subprocess(processes, function(error, processes){
+  if (error) {
+    console.error(error.stack);
     process.exit(1);
   }
-
   console.log('processes started successfully!');
 });
 ```
