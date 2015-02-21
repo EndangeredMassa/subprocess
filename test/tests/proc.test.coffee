@@ -1,20 +1,37 @@
 sub = require '../../src'
 assert = require 'assertive'
 
-processes = null
+currentProcesses = null
 
 # if mocha crashes, the child process
 # running our tests won't clean itself
 # up properly; so, we have to do this
 process.on 'uncaughtException', (error) ->
-  sub.killAll(processes) if processes?
+  sub.killAll(currentProcesses) if currentProcesses?
   console.error error.stack
   process.exit(1)
 
+runSub = (config, done, callback) ->
+  sub config, (error, _processes) ->
+    # save off the current processes
+    # so that we can kill them
+    # (1) if mocha crashes or
+    # (2) afterEach test
+    currentProcesses = _processes
+
+    # if an error is thrown async,
+    # the mocha process crashes;
+    # this allows the test suite to
+    # keep running
+    try
+      callback(error, currentProcesses)
+    catch testError
+      done(testError)
+
 describe 'sub', ->
   afterEach ->
-    sub.killAll(processes) if processes?
-    processes = null
+    sub.killAll(currentProcesses) if currentProcesses?
+    currentProcesses = null
 
   describe 'starts a process', ->
     before (done) ->
@@ -24,8 +41,7 @@ describe 'sub', ->
           logFilePath: 'test/log/start-proc.log'
           port: 9903
 
-      sub config, (error, _processes) =>
-        processes = _processes
+      runSub config, done, (error, processes) =>
         @proc = processes?.app
         done(error)
 
@@ -64,13 +80,9 @@ describe 'sub', ->
         verify: (port, callback) ->
           callback(forceError)
 
-    sub config, (error, _processes) ->
-      processes = _processes
-      try
-        assert.equal forceError, error
-        done()
-      catch testError
-        done(testError)
+    runSub config, done, (error, processes) ->
+      assert.equal forceError, error
+      done()
 
   it 'passes along spawn options', (done) ->
     config =
@@ -84,8 +96,7 @@ describe 'sub', ->
           env:
             testResult: 100
 
-    sub config, (error, _processes) ->
-      processes = _processes
+    runSub config, done, (error, processes) ->
       return done(error) if error?
 
       # wait a little bit for the process
@@ -110,13 +121,9 @@ describe 'sub', ->
         verify: (port, callback) ->
           callback(null, false) # not yet ready
 
-    sub config, (error, _processes) ->
-      processes = _processes
-      try
-        assert.include 'timeout: 10ms', error.message
-        done()
-      catch testError
-        done(testError)
+    runSub config, done, (error, processes) ->
+      assert.include 'timeout: 10ms', error.message
+      done()
 
   it 'shows the log when a process errors', (done) ->
     config =
@@ -124,13 +131,9 @@ describe 'sub', ->
         command: 'node test/apps/error.js %port%'
         logFilePath: 'test/log/process-error.log'
 
-    sub config, (error, _processes) ->
-      processes = _processes
-      try
-        assert.include 'intentional failure', error.message
-        done()
-      catch testError
-        done(testError)
+    runSub config, done, (error, _processes) ->
+      assert.include 'intentional failure', error.message
+      done()
 
   it 'starts dependant processes', (done) ->
     serviceReady = false
@@ -152,7 +155,6 @@ describe 'sub', ->
           serviceReady = true
           callback(null, true) # no error
 
-    sub config, (error, _processes) ->
-      processes = _processes
+    runSub config, done, (error, processes) ->
       done(error)
 
