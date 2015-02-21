@@ -28,10 +28,16 @@ var config = {
 
     verifyInterval: 100,                    // ms, default
     verifyTimeout: 3000,                    // ms, default
-    verify: function(port, callback){       // optional, defaults to checking
-      // custom verification logic          //   for port availablility
+
+    // optional, defaults to checking for something listening on the port
+    // called every `verifyInterval` until `verifyTimeout` or
+    // the callback says it's ready
+    verify: function(port, callback){
+      // custom verification logic
+
       // `error` means to stop checking for availability
       // `isAvailable=false` means to keep checking
+      // `isAvailable=true` means that the process is up and ready
       callback(error, isAvailable);
     }
   }
