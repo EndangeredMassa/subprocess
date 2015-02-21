@@ -12,27 +12,46 @@ process.on 'uncaughtException', (error) ->
   process.exit(1)
 
 describe 'sub', ->
-  beforeEach ->
-    processes = null
   afterEach ->
     sub.killAll(processes) if processes?
+    processes = null
 
-  it 'starts a process', (done) ->
-    config =
-      app:
-        command: 'node test/apps/service.js %port%'
-        logFilePath: 'test/log/start-proc.log'
+  describe 'starts a process', ->
+    before (done) ->
+      config =
+        app:
+          command: 'node test/apps/service.js %port%'
+          logFilePath: 'test/log/start-proc.log'
+          port: 9903
 
-    sub config, (error, _processes) ->
-      processes = _processes
+      sub config, (error, _processes) =>
+        processes = _processes
+        @proc = processes?.app
+        done(error)
 
-      try
-        assert.falsey 'error', error
-        assert.falsey 'process.exitCode', processes.app.rawProcess.exitCode
-        assert.truthy 'process.pid', processes.app.rawProcess.pid
-        done()
-      catch testError
-        done(testError)
+    it 'has rawProcess.pid', ->
+      assert.truthy 'process.rawProcess.pid', @proc.rawProcess.pid
+
+    it 'has baseUrl', ->
+      assert.equal 'process.baseUrl', 'http://127.0.0.1:9903', @proc.baseUrl
+
+    it 'has port', ->
+      assert.equal 'process.port', 9903, @proc.port
+
+    it 'has logPath', ->
+      assert.match 'process.logPath', /test\/log\/start-proc\.log$/, @proc.logPath
+
+    it 'has logHandle', ->
+      assert.equal 'process.logHandle', 'number', typeof @proc.logHandle
+
+    it 'has launchCommand', ->
+      assert.equal 'process.launchCommand', 'node', @proc.launchCommand
+
+    it 'has launchArguments', ->
+      assert.deepEqual 'process.launchArguments', ['test/apps/service.js', '9903'], @proc.launchArguments
+
+    it 'has workingDirectory', ->
+      assert.equal 'process.workingDirectory', 'string', typeof @proc.workingDirectory
 
   it 'allows custom verification', (done) ->
     forceError = new Error 'force failure'
