@@ -1,7 +1,8 @@
 {
   "name": "subprocess",
   "version": "0.1.0",
-  "description": "",
+  "description": "an async.auto for processes",
+  "license": "BSD-3-Clause",
   "main": "lib/index.js",
   "scripts": {
     "build": "coffee --output lib/ --compile src/",
