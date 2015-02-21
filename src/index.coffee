@@ -10,7 +10,7 @@ verify = require './verify'
 
 
 convert = (proc) ->
-  proc = extend {}, defaults, proc
+  proc = extend {}, defaults(proc.name), proc
   proc.spawnOpts.cwd ?= process.cwd()
 
   (callback) ->
@@ -44,9 +44,9 @@ autoable = (name, proc) ->
   else
     func
 
-defaults =
+defaults = (procName) ->
   port: 0 # get random available port
-  logFilePath: './log/process.log' # TODO: use proc name
+  logFilePath: "./log/#{procName}.log"
   spawnOpts: {}
   verifyInterval: 100
   verifyTimeout: 3000
