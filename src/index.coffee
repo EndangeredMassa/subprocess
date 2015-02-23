@@ -25,7 +25,7 @@ convert = (proc) ->
       port.findOpen proc.port, (error, availablePort) ->
         return callback(error) if error?
 
-        child = spawn(proc.name, proc.command, availablePort, logPath, logHandle, spawnOpts)
+        child = spawn(proc.name, proc.command, proc.commandArgs, availablePort, logPath, logHandle, spawnOpts)
 
         verify child, proc.verify, proc.verifyInterval, proc.verifyTimeout, availablePort, (error) ->
           return callback(error) if error?

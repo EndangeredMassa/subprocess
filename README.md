@@ -21,7 +21,8 @@ var subprocess = require('subprocess');
 var config = {
   processName: {
     dependsOn: ['<other proc name>', ...],  // optional
-    command: 'node index.js --port=%port%', // %port% is populated with the port
+    command: 'node',
+    commandArgs: ['index.js', '%port%'],    // %port% is replaced with the port
     port: 9999,                             // omit to get a random available port
     logPath: './log/process.log',           // file path to log file for stdio
     spawnOptions: {},                       // options to pass to child_process.spawn
@@ -58,7 +59,7 @@ subprocess(config, function(error, processes){
       logPath: './log/process.log',
       logHandle: [LogHandle],
       launchCommand: 'node',
-      launchArguments: ['index.js', '--port=9999'],
+      launchArguments: ['index.js', '9999'],
       workingDirectory: '~/someplace'
     }
   }
@@ -104,12 +105,14 @@ var request = require('request');
 var processes = {
   app: {
     dependsOn: ['service'],
-    command: 'node index.js --port=%port%',
+    command: 'node',
+    commandArgs: ['index.js', '--port=%port%'],
     port: 4500
   },
 
   service: {
-    command: 'node service.js --port=%port%',
+    command: 'node',
+    commandArgs: ['service.js', '--port=%port%'],
     verify: function(port, callback){
       request('http://localhost:'+port+'/status', function(error, response, body){
         var isReady = !error && response.statusCode == 200;

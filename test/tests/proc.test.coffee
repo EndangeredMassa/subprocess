@@ -37,7 +37,8 @@ describe 'sub', ->
     before (done) ->
       config =
         app:
-          command: 'node test/apps/service.js %port%'
+          command: 'node'
+          commandArgs: ['test/apps/service.js', '%port%']
           logFilePath: 'test/log/start-proc.log'
           port: 9903
 
@@ -74,7 +75,8 @@ describe 'sub', ->
 
     config =
       app:
-        command: 'node test/apps/service.js %port%'
+        command: 'node'
+        commandArgs: ['test/apps/service.js', '%port%']
         logFilePath: 'test/log/custom-verification.log'
         port: 6501
         verify: (port, callback) ->
@@ -87,7 +89,8 @@ describe 'sub', ->
   it 'passes along spawn options', (done) ->
     config =
       app:
-        command: 'node test/apps/env-echo.js'
+        command: 'node'
+        commandArgs: ['test/apps/env-echo.js']
         logFilePath: 'test/log/spawn-opts.log'
         port: 9933
         verify: (port, callback) ->
@@ -115,7 +118,8 @@ describe 'sub', ->
   it 'allows arbitrary verification timeouts', (done) ->
     config =
       app:
-        command: 'node test/apps/hang.js'
+        command: 'node'
+        commandArgs: ['test/apps/hang.js']
         logFilePath: 'test/log/timeout.log'
         verifyTimeout: 10
         verify: (port, callback) ->
@@ -128,7 +132,8 @@ describe 'sub', ->
   it 'shows the log when a process errors', (done) ->
     config =
       app:
-        command: 'node test/apps/error.js %port%'
+        command: 'node'
+        commandArgs: ['test/apps/error.js', '%port%']
         logFilePath: 'test/log/process-error.log'
 
     runSub config, done, (error, _processes) ->
@@ -141,7 +146,8 @@ describe 'sub', ->
     config =
       app:
         dependsOn: ['service']
-        command: 'node test/apps/service.js %port%'
+        command: 'node'
+        commandArgs: ['test/apps/service.js', '%port%']
         logFilePath: 'test/log/dep-app.log'
         port: 6500
         verify: (port, callback) ->
@@ -149,7 +155,8 @@ describe 'sub', ->
           callback(null, true)
 
       service:
-        command: 'node test/apps/service.js %port%'
+        command: 'node'
+        commandArgs: ['test/apps/service.js', '%port%']
         logFilePath: 'test/log/dep-service.log'
         verify: (port, callback) ->
           serviceReady = true

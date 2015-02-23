@@ -30,21 +30,22 @@ procNotFoundError = (error, cmd) ->
   error.message = "Unable to find #{cmd}"
   error
 
-module.exports = (name, command, port, logPath, logHandle, spawnOpts) ->
-  command = command.replace '%port%', port
-  args = command.split(' ')
-  cmd = args[0]
-  args = args.slice(1)
+interpolatePort = (args, port) ->
+  args.map (arg) ->
+    arg.replace '%port%', port
+
+module.exports = (name, command, commandArgs, port, logPath, logHandle, spawnOpts) ->
+  commandArgs = interpolatePort(commandArgs, port)
 
   child =
-    rawProcess: spawn cmd, args, spawnOpts
+    rawProcess: spawn command, commandArgs, spawnOpts
     name: name
     baseUrl: "http://127.0.0.1:#{port}"
     port: port
     logPath: logPath
     logHandle: logHandle
-    launchCommand: cmd
-    launchArguments: args
+    launchCommand: command
+    launchArguments: commandArgs
     workingDirectory: spawnOpts.cwd
 
   registerUncaughtHandler(child)
@@ -56,7 +57,7 @@ module.exports = (name, command, port, logPath, logHandle, spawnOpts) ->
 
   child.rawProcess.on 'error', (err) ->
     if err.errno is 'ENOENT'
-      child.error = procNotFoundError(err, cmd).stack
+      child.error = procNotFoundError(err, command).stack
     child.rawProcess.kill()
 
   child
