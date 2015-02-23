@@ -68,7 +68,6 @@ module.exports = (proc, validate, interval, timeout, port, callback) ->
   startTime = Date.now()
 
   check = ->
-    # debug 'Checking for %s on port %s', procName, port
     validate port, (error, isReady) ->
       if proc.rawProcess.exitCode?
         error = procCrashedError(proc)
