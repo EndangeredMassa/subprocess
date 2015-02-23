@@ -6,6 +6,10 @@ of a series of child processes.
 
 It's like an [`async.auto`](https://github.com/caolan/async#auto)
 for processes.
+Note that the depedencies are registered
+as the property `dependsOn`
+instead of preceding elements in an array.
+
 
 ## install
 
@@ -20,7 +24,8 @@ var subprocess = require('subprocess');
 
 var config = {
   processName: {
-    dependsOn: ['<other proc name>', ...],  // optional
+    dependsOn: ['<other proc name>', ...],  // optional dependant processes
+                                            // differs from async.auto in syntax
     command: 'node',
     commandArgs: ['index.js', '%port%'],    // %port% is replaced with the port
     port: 9999,                             // omit to get a random available port
