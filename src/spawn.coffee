@@ -6,7 +6,7 @@ procNotFoundError = (error, cmd) ->
   error
 
 module.exports = (name, command, port, logPath, logHandle, spawnOpts) ->
-  command = command.replace '\%port\%', port
+  command = command.replace '%port%', port
   args = command.split(' ')
   cmd = args[0]
   args = args.slice(1)
