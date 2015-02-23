@@ -5,7 +5,7 @@ fs = require 'fs'
 module.exports = (cwd, logPath, callback) ->
   filename = path.resolve cwd, logPath
   dirname = path.dirname filename
-  flags = 'w+'
+  flags = 'w'
 
   mkdirp dirname, (error) ->
     return callback(error) if error?
