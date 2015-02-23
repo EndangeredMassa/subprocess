@@ -30,12 +30,12 @@ procNotFoundError = (error, cmd) ->
   error.message = "Unable to find #{cmd}"
   error
 
-interpolatePort = (args, port) ->
-  args.map (arg) ->
+interpolatePort = (port) ->
+  (arg) ->
     arg.replace '%port%', port
 
 module.exports = (name, command, commandArgs, port, logPath, logHandle, spawnOpts) ->
-  commandArgs = interpolatePort(commandArgs, port)
+  commandArgs = commandArgs.map(interpolatePort port)
 
   child =
     rawProcess: spawn command, commandArgs, spawnOpts
