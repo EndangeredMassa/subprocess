@@ -1,6 +1,6 @@
 {
   "name": "subprocess",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "an async.auto for processes",
   "license": "BSD-3-Clause",
   "main": "lib/index.js",
