@@ -1,5 +1,4 @@
 {spawn} = require 'child_process'
-extend = require 'deep-extend'
 fs = require 'fs'
 
 procNotFoundError = (error, cmd) ->
@@ -12,10 +11,9 @@ module.exports = (name, command, port, logPath, logHandle, spawnOpts) ->
   cmd = args[0]
   args = args.slice(1)
 
-  child = {}
-  child.rawProcess = spawn cmd, args, spawnOpts
-  child.name = name
-  extend child,
+  child =
+    rawProcess: spawn cmd, args, spawnOpts
+    name: name
     baseUrl: "http://127.0.0.1:#{port}"
     port: port
     logPath: logPath
@@ -23,6 +21,7 @@ module.exports = (name, command, port, logPath, logHandle, spawnOpts) ->
     launchCommand: cmd
     launchArguments: args
     workingDirectory: spawnOpts.cwd
+
   child.readLog = (callback) ->
     fs.readFile logPath, (error, data) ->
       return callback(error) if error?

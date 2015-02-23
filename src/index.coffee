@@ -1,7 +1,6 @@
 portscanner = require 'portscanner'
 async = require 'async'
-{clone} = require 'lodash'
-extend = require 'deep-extend'
+{merge, clone} = require 'lodash'
 port = require './port'
 
 openLogFile = require './log'
@@ -10,7 +9,7 @@ verify = require './verify'
 
 
 convert = (proc) ->
-  proc = extend {}, defaults(proc.name), proc
+  proc = merge {}, defaults(proc.name), proc
   proc.spawnOpts.cwd ?= process.cwd()
 
   (callback) ->
@@ -20,8 +19,8 @@ convert = (proc) ->
 
       spawnOpts =
         stdio: [ 'ignore', logHandle, logHandle ]
-        env: process.env
-      extend spawnOpts, proc.spawnOpts
+        env: clone(process.env)
+      merge spawnOpts, proc.spawnOpts
 
       port.findOpen proc.port, (error, availablePort) ->
         return callback(error) if error?
