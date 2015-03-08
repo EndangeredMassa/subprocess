@@ -195,3 +195,14 @@ describe 'sub', ->
             done(testError)
       ), 100
 
+  it 'errors when invalid port key is used', (done) ->
+    config =
+      app:
+        command: 'node'
+        commandArgs: ['test/apps/service.js', '%port%', '%service.port%']
+        logFilePath: 'test/log/key-error.log'
+
+    runSub config, done, (error, processes) ->
+      assert.truthy 'error', error?.stack
+      done()
+

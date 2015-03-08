@@ -35,6 +35,13 @@ interpolatePorts = (args, processName, port) ->
   processPorts["#{processName}.port"] = port
   args.map (arg) ->
     arg = arg.replace '%port%', port
+
+    arg.replace /%([^%]+)%/, (m, key) ->
+      if processPorts[key]
+        processPorts[key]
+      else
+        throw new Error "Invalid placeholder in #{processName}'s argument list: %#{key}%"
+
     for procKey, procPort of processPorts
       arg = arg.replace procKey, procPort
     arg
