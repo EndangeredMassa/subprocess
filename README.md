@@ -10,6 +10,11 @@ Note that the depedencies are registered
 as the property `dependsOn`
 instead of preceding elements in an array.
 
+This project is a safe and inclusive place
+for contributors of all kinds.
+See the [Code of Conduct](CODE_OF_CONDUCT.md)
+for details.
+
 
 ## install
 
