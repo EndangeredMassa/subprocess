@@ -6,6 +6,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "coffee --output lib/ --compile src/",
+    "pretest": "npm run build",
     "test": "rm -rf test/log && mocha --recursive --compilers test.coffee:coffee-script/register test/tests"
   },
   "devDependencies": {
