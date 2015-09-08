@@ -1,4 +1,4 @@
-sub = require '../../src'
+sub = require '../../lib'
 assert = require 'assertive'
 
 currentProcesses = null
