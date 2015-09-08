@@ -79,6 +79,7 @@ module.exports = (proc, validate, interval, timeout, port, callback) ->
         callback()
       else
         if (Date.now() - startTime) >= timeout
+          try proc.rawProcess.kill()
           return callback(procTimedoutError proc, port, timeout)
         setTimeout(check, 100)
 
