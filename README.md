@@ -34,7 +34,7 @@ var config = {
     command: 'node',
     commandArgs: ['index.js', '%port%'],    // %port% is replaced with the port
     port: 9999,                             // omit to get a random available port
-    logPath: './log/process.log',           // file path to log file for stdio
+    logFilePath: './log/process.log',           // file path to log file for stdio
     spawnOptions: {},                       // options to pass to child_process.spawn
 
     verifyInterval: 100,                    // ms, default
@@ -66,7 +66,7 @@ subprocess(config, function(error, processes){
       rawProcess: [ChildProcess],
       baseUrl: "http://127.0.0.1:9999",
       port: 9999,
-      logPath: './log/process.log',
+      logFilePath: './log/process.log',
       logHandle: [LogHandle],
       launchCommand: 'node',
       launchArguments: ['index.js', '9999'],
