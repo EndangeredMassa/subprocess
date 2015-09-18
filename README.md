@@ -32,7 +32,9 @@ var config = {
     dependsOn: ['<other proc name>', ...],  // optional dependant processes
                                             // differs from async.auto in syntax
     command: 'node',
-    commandArgs: ['index.js', '%port%'],    // %port% is replaced with the port
+    commandArgs: ['index.js', '%port%', '%otherproc.port%'],
+                                            // %port% is replaced with the port
+                                            // %otherproc.port% is replaced with that port
     port: 9999,                             // omit to get a random available port
     logFilePath: './log/process.log',           // file path to log file for stdio
     spawnOptions: {},                       // options to pass to child_process.spawn

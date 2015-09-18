@@ -22,8 +22,13 @@ convert = (proc) ->
         env: clone(process.env)
       merge spawnOpts, proc.spawnOpts
 
+
+      # move?
       port.findOpen proc.port, (error, availablePort) ->
         return callback(error) if error?
+
+        # has to go here
+
 
         child = spawn(proc.name, proc.command, proc.commandArgs, availablePort, logPath, logHandle, spawnOpts)
 
@@ -57,17 +62,30 @@ defaults = (procName) ->
       callback(null, true)
 
 subprocess = (processConfig, callback) ->
-  config = {}
-  for key in Object.keys(processConfig)
-    config[key] = autoable(key, processConfig[key])
+  try
+    config = {}
+    for key in Object.keys(processConfig)
+      config[key] = autoable(key, processConfig[key])
 
-  async.auto config, (error, procs) ->
-    return callback(error) if error?
-    callback(null, procs)
+    configArray = []
+    for key in Object.keys(processConfig)
+      item = {}
+      item[key] = processConfig[key]
+      configArray.push(item)
+    async.reduce configArray, {}, (result, item, callback) ->
+      # TODO
+      result[]
+
+
+    async.auto config, (error, procs) ->
+      return callback(error) if error?
+      callback(null, procs)
+  catch error
+    callback(error)
 
 subprocess.killAll = (procs) ->
-  for key, value of procs
-    value.rawProcess.kill()
+  for key, proc of procs
+    proc.rawProcess.kill()
 
 module.exports = subprocess
 

@@ -29,12 +29,24 @@ procNotFoundError = (error, cmd) ->
   error.message = "Unable to find #{cmd}"
   error
 
-interpolatePort = (port) ->
-  (arg) ->
-    arg.replace '%port%', port
+processPorts = {}
+interpolatePorts = (args, processName, port) ->
+  processPorts["#{processName}.port"] = port
+  args.map (arg) ->
+    arg = arg.replace '%port%', port
+
+    arg.replace /%([^%]+)%/, (m, key) ->
+      if processPorts[key]
+        processPorts[key]
+      else
+        throw new Error "Invalid placeholder in #{processName}'s argument list: %#{key}%"
+
+    for procKey, procPort of processPorts
+      arg = arg.replace procKey, procPort
+    arg
 
 module.exports = (name, command, commandArgs, port, logPath, logHandle, spawnOpts) ->
-  commandArgs = commandArgs.map(interpolatePort port)
+  commandArgs = interpolatePorts(commandArgs, name, port)
 
   child =
     rawProcess: spawn command, commandArgs, spawnOpts

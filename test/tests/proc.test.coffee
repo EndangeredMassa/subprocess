@@ -163,5 +163,46 @@ describe 'sub', ->
           callback(null, true) # no error
 
     runSub config, done, (error, processes) ->
-      done(error)
+       done(error)
+
+  it 'interpolates other process ports in command arguments', (done) ->
+    config =
+      app:
+        dependsOn: ['service']
+        command: 'node'
+        commandArgs: ['test/apps/dep-service.js', '%port%', '%service.port%']
+        logFilePath: 'test/log/ports-app.log'
+        port: 6500
+
+      service:
+        command: 'node'
+        commandArgs: ['test/apps/service.js', '%port%']
+        logFilePath: 'test/log/ports-service.log'
+
+    runSub config, done, (error, processes) ->
+      return done(error) if error?
+
+      # wait a little bit for the process
+      # to actually write out to the log file;
+      # yes, arbitrary delays are bad
+      setTimeout ( ->
+        processes.app.readLog (error, log) ->
+          return done(error) if error?
+          try
+            assert.include processes.service.port, log
+            done()
+          catch testError
+            done(testError)
+      ), 100
+
+  it 'errors when invalid port key is used', (done) ->
+    config =
+      app:
+        command: 'node'
+        commandArgs: ['test/apps/service.js', '%port%', '%service.port%']
+        logFilePath: 'test/log/key-error.log'
+
+    runSub config, done, (error, processes) ->
+      assert.truthy 'error', error?.stack
+      done()
 
