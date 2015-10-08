@@ -113,7 +113,7 @@ describe 'sub', ->
             done()
           catch testError
             done(testError)
-      ), 100
+      ), 500
 
   it 'allows arbitrary verification timeouts', (done) ->
     config =
@@ -127,6 +127,17 @@ describe 'sub', ->
 
     runSub config, done, (error, processes) ->
       assert.include 'timeout: 10ms', error.message
+      done()
+
+  it 'shows nice errors if the program was not found', (done) ->
+    config =
+      app:
+        command: 'node2'
+        commandArgs: ['test/apps/hang.js']
+        logFilePath: 'test/log/not-found.log'
+
+    runSub config, done, (error, processes) ->
+      assert.include 'ENOENT - Unable to find node2', error.message
       done()
 
   it 'shows the log when a process errors', (done) ->
