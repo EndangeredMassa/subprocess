@@ -18,7 +18,7 @@ convert = (proc) ->
       {fd: logHandle, filename: logPath} = results
 
       spawnOpts =
-        stdio: [ 'ignore', logHandle, logHandle ]
+        stdio: [ 'ignore', logHandle, logHandle, 'ipc' ]
         env: clone(process.env)
       merge spawnOpts, proc.spawnOpts
 

@@ -18,7 +18,7 @@ getLogWithQuote = (proc) ->
 procCrashedError = (proc) ->
   message =
     """
-    Process \"#{proc.name}\" crashed with code #{proc.exitCode}.
+    Process \"#{proc.name}\" crashed with code #{proc.rawProcess.exitCode}.
     #{getLogWithQuote proc}
     """
   message += "\n#{proc.error.trim()}" if proc.error?.length > 0
